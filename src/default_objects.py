@@ -12,7 +12,7 @@ earth_pos = [earth_distance_to_sun, 0]
 earth_vel = [0, -math.sqrt((constants.G * sun_mass) / earth_distance_to_sun)]
 
 def get_sun():
-    return Particle("Sun", sun_pos, sun_vel, sun_mass)
+    return Particle('Sun', sun_pos, sun_vel, sun_mass)
 
 def get_earth():
-    return Particle("Earth", earth_pos, earth_vel, earth_mass)
+    return Particle('Earth', earth_pos, earth_vel, earth_mass)
