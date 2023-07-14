@@ -3,11 +3,12 @@ import constants
 
 
 class Particle:
-    def __init__(self, name, pos, vel, mass):
+    def __init__(self, name, pos, vel, mass, display_size=2):
         self.name = name
         self.pos = pos
         self.velocity = vel
         self.mass = mass
+        self.display_size = display_size
 
     def update(self, particles, dt):
         for other in particles:

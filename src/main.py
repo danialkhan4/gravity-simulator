@@ -3,6 +3,7 @@ import constants
 import math
 from particle import Particle
 import default_objects
+import exoplanets
 
 # Game setup
 pygame.init()
@@ -19,6 +20,8 @@ particles = []
 particles.append(default_objects.get_sun())
 particles.append(default_objects.get_earth())
 
+planets = exoplanets.load_exoplanet_data()
+
 # Define scaling factors
 scale_factor = constants.width / (8 * constants.AU)  # Scaling sim space
 
@@ -30,8 +33,7 @@ dragging = False
 running = True
 
 # Text input
-input = 'Press S to search for an exoplanet'
-typing = False
+selected_planet = planets[0]
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -59,43 +61,28 @@ while running:
                 scaled_pos = [(pos[0] - constants.width / 2) / scale_factor,
                               (pos[1] - constants.height / 2) / scale_factor]
 
-                particles.append(
-                    Particle('Earth', scaled_pos, velocity,
-                             5.972 * math.pow(10, 24)))
+                name, mass = selected_planet
+                particles.append(Particle(name, scaled_pos, velocity, mass * constants.earth_mass))
+                    
         elif event.type == pygame.MOUSEMOTION:
             if clicking:
                 dragging = True
             else:
                 dragging = False
         elif event.type == pygame.KEYDOWN:
-            if typing == True:
-                keys = pygame.key.get_pressed()
-                
-                for key_code in range(pygame.K_a, pygame.K_z + 1):
-                    if keys[key_code] and keys[pygame.K_LSHIFT]:
-                        key = chr(key_code).upper()
-                        input = input + key
-                    elif keys[key_code]:
-                        key = chr(key_code)
-                        input = input + key
-    
-                        
-                for key_code in range(pygame.K_0, pygame.K_9 + 1):
-                    if keys[key_code]:
-                        key = chr(key_code)
-                        input = input + key
-            
-                if keys[pygame.K_SPACE]:
-                    input = input + ' '
-            if event.key == pygame.K_s:
-                if typing == False:
-                    typing = True
-                    input = ''
-            if event.key == pygame.K_RETURN:
-                typing = False
-                input = 'Press S to search for an exoplanet'
-                
+            keys = pygame.key.get_pressed()
 
+            if keys[pygame.K_1]:
+                selected_planet = planets[0]
+                print("Selecting earth")
+                
+            for key_code in range(pygame.K_1, pygame.K_9 + 1):
+                if keys[key_code]:
+                    key = chr(key_code).upper()
+                    key = int(key) - 1
+                    selected_planet = planets[key]
+                    print("Selecting ", key, selected_planet)
+                    
     screen.fill(constants.BLACK)
     if dragging:
         pos = pygame.mouse.get_pos()
@@ -111,7 +98,7 @@ while running:
         # Map simulation coordinates to screen coordinates
         screen_x = int(particle.pos[0] * scale_factor + constants.width / 2)
         screen_y = int(particle.pos[1] * scale_factor + constants.height / 2)
-        pygame.draw.circle(screen, constants.WHITE, [screen_x, screen_y], 5)
+        pygame.draw.circle(screen, constants.WHITE, [screen_x, screen_y], particle.display_size)
 
         # Text label
         text = font.render(particle.name, True, constants.WHITE)
@@ -119,11 +106,19 @@ while running:
         text_rect.center = [screen_x, screen_y + 15]
         screen.blit(text, text_rect)
 
-    # Text box
-    text_input = font.render(input, True, constants.WHITE)
-    text_input_rect = text.get_rect()
-    text_input_rect.center = [15, constants.height - 15]
-    screen.blit(text_input, text_input_rect)
+
+    pos = 0
+    for planet in planets:
+        name, _ = planet
+        selected_name, _ = selected_planet
+
+        colour = constants.AQUA if name == selected_name else constants.WHITE
+        name_text = '[' + str(pos + 1) + '] ' + name
+        text_input = font.render(name_text, True, colour)
+        text_input_rect = text_input.get_rect()
+        text_input_rect.topleft = [pos * 60, constants.height - 15]
+        screen.blit(text_input, text_input_rect)
+        pos = pos + 1
 
     pygame.display.flip()
     clock.tick(60)
