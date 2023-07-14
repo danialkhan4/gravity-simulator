@@ -1,6 +1,5 @@
 import pygame
 import constants
-import math
 from particle import Particle
 import default_objects
 import exoplanets
@@ -32,8 +31,7 @@ clicking = False
 dragging = False
 running = True
 
-# Text input
-selected_planet = planets[0]
+selected_planet = planets[0] # Default to earth
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -62,8 +60,9 @@ while running:
                               (pos[1] - constants.height / 2) / scale_factor]
 
                 name, mass = selected_planet
-                particles.append(Particle(name, scaled_pos, velocity, mass * constants.earth_mass))
-                    
+                particles.append(
+                    Particle(name, scaled_pos, velocity,
+                             mass * constants.earth_mass))
         elif event.type == pygame.MOUSEMOTION:
             if clicking:
                 dragging = True
@@ -72,22 +71,25 @@ while running:
         elif event.type == pygame.KEYDOWN:
             keys = pygame.key.get_pressed()
 
-            if keys[pygame.K_1]:
+            if keys[pygame.K_1]:  # Pressing 1 for earth
                 selected_planet = planets[0]
                 print("Selecting earth")
-                
-            for key_code in range(pygame.K_1, pygame.K_9 + 1):
+
+            for key_code in range(
+                    pygame.K_1, pygame.K_9 +
+                    1):  # pressing other numbers for other planets
                 if keys[key_code]:
                     key = chr(key_code).upper()
                     key = int(key) - 1
                     selected_planet = planets[key]
                     print("Selecting ", key, selected_planet)
-                    
+
     screen.fill(constants.BLACK)
     if dragging:
         pos = pygame.mouse.get_pos()
         pygame.draw.line(screen, constants.WHITE, drag_start, pos, width=1)
 
+    # simulation speed
     dt = 80_000
     for particle in particles:
         particle.update(particles, dt)
@@ -98,7 +100,8 @@ while running:
         # Map simulation coordinates to screen coordinates
         screen_x = int(particle.pos[0] * scale_factor + constants.width / 2)
         screen_y = int(particle.pos[1] * scale_factor + constants.height / 2)
-        pygame.draw.circle(screen, constants.WHITE, [screen_x, screen_y], particle.display_size)
+        pygame.draw.circle(screen, constants.WHITE, [screen_x, screen_y],
+                           particle.display_size)
 
         # Text label
         text = font.render(particle.name, True, constants.WHITE)
@@ -106,7 +109,7 @@ while running:
         text_rect.center = [screen_x, screen_y + 15]
         screen.blit(text, text_rect)
 
-
+    # Draw the labels at the bottom for the planet selector
     pos = 0
     for planet in planets:
         name, _ = planet
